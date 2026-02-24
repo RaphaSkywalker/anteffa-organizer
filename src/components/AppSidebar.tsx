@@ -55,7 +55,7 @@ export function AppSidebar() {
         </div>
         {!collapsed && (
           <div className="animate-slide-in-left">
-            <h1 className="font-bold text-sidebar-accent-foreground text-lg tracking-tight">
+            <h1 className="font-bold text-sidebar-accent-foreground text-lg tracking-tight" style={{ fontFamily: "'HandelGothic BT', sans-serif" }}>
               ANTEFFA
             </h1>
             <p className="text-[10px] text-sidebar-foreground leading-none -mt-0.5 tracking-widest uppercase">
