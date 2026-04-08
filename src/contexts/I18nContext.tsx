@@ -1,99 +1,95 @@
-import { ReactNode, createContext, useContext, useState } from "react";
-
-type Language = "pt" | "en" | "es";
+import { ReactNode, createContext, useContext } from "react";
 
 type Translations = {
-  [key: string]: { pt: string; en: string; es: string };
+  [key: string]: string;
 };
 
 const translations: Translations = {
   // Sidebar
-  "nav.dashboard": { pt: "Painel", en: "Dashboard", es: "Panel" },
-  "nav.agenda": { pt: "Agenda", en: "Agenda", es: "Agenda" },
-  "nav.tasks": { pt: "Tarefas", en: "Tasks", es: "Tareas" },
-  "nav.chat": { pt: "Chat", en: "Chat", es: "Chat" },
-  "nav.messages": { pt: "Mensagens", en: "Messages", es: "Mensajes" },
-  "nav.teams": { pt: "Times", en: "Teams", es: "Equipos" },
-  "nav.dates": { pt: "Datas", en: "Dates", es: "Fechas" },
-  "nav.admin": { pt: "Admin", en: "Admin", es: "Admin" },
-  "nav.settings": { pt: "Configurações", en: "Settings", es: "Ajustes" },
+  "nav.dashboard": "Painel",
+  "nav.ponto": "Meu Ponto",
+  "nav.agenda": "Agenda",
+  "nav.tasks": "Tarefas",
+  "nav.chat": "Chat",
+  "nav.messages": "Mensagens",
+  "nav.teams": "Times",
+  "nav.dates": "Datas",
+  "nav.admin": "Admin",
+  "nav.settings": "Configurações",
 
   // Dashboard
-  "dashboard.welcome": { pt: "Bom dia", en: "Good morning", es: "Buenos días" },
-  "dashboard.summary": { pt: "Resumo do Dia", en: "Daily Summary", es: "Resumen del Día" },
-  "dashboard.pendingTasks": { pt: "Tarefas Pendentes", en: "Pending Tasks", es: "Tareas Pendientes" },
-  "dashboard.upcomingMeetings": { pt: "Próximas Reuniões", en: "Upcoming Meetings", es: "Próximas Reuniones" },
-  "dashboard.unreadMessages": { pt: "Mensagens não Lidas", en: "Unread Messages", es: "Mensajes sin Leer" },
-  "dashboard.teamMembers": { pt: "Membros do Time", en: "Team Members", es: "Miembros del Equipo" },
-  "dashboard.recentActivity": { pt: "Atividade Recente", en: "Recent Activity", es: "Actividad Reciente" },
-  "dashboard.birthdays": { pt: "Aniversariantes", en: "Birthdays", es: "Cumpleaños" },
-  "dashboard.quickActions": { pt: "Ações Rápidas", en: "Quick Actions", es: "Acciones Rápidas" },
-  "dashboard.todayTasks": { pt: "Tarefas de Hoje", en: "Today's Tasks", es: "Tareas de Hoy" },
+  "dashboard.welcome": "Bom dia",
+  "dashboard.summary": "Resumo do Dia",
+  "dashboard.pendingTasks": "Tarefas Pendentes",
+  "dashboard.upcomingMeetings": "Próximas Reuniões",
+  "dashboard.unreadMessages": "Mensagens não Lidas",
+  "dashboard.teamMembers": "Membros do Time",
+  "dashboard.recentActivity": "Atividade Recente",
+  "dashboard.birthdays": "Aniversariantes",
+  "dashboard.quickActions": "Ações Rápidas",
+  "dashboard.todayTasks": "Tarefas de Hoje",
 
   // Tasks
-  "tasks.title": { pt: "Gestão de Tarefas", en: "Task Management", es: "Gestión de Tareas" },
-  "tasks.list": { pt: "Lista", en: "List", es: "Lista" },
-  "tasks.kanban": { pt: "Kanban", en: "Kanban", es: "Kanban" },
-  "tasks.pending": { pt: "Pendente", en: "Pending", es: "Pendiente" },
-  "tasks.inProgress": { pt: "Em Andamento", en: "In Progress", es: "En Progreso" },
-  "tasks.completed": { pt: "Concluída", en: "Completed", es: "Completada" },
-  "tasks.high": { pt: "Alta", en: "High", es: "Alta" },
-  "tasks.medium": { pt: "Média", en: "Medium", es: "Media" },
-  "tasks.low": { pt: "Baixa", en: "Low", es: "Baja" },
-  "tasks.urgent": { pt: "Urgente", en: "Urgent", es: "Urgente" },
-  "tasks.newTask": { pt: "Nova Tarefa", en: "New Task", es: "Nueva Tarea" },
+  "tasks.title": "Gestão de Tarefas",
+  "tasks.list": "Lista",
+  "tasks.kanban": "Kanban",
+  "tasks.pending": "Pendente",
+  "tasks.inProgress": "Em Andamento",
+  "tasks.completed": "Concluída",
+  "tasks.high": "Alta",
+  "tasks.medium": "Média",
+  "tasks.low": "Baixa",
+  "tasks.urgent": "Urgente",
+  "tasks.newTask": "Nova Tarefa",
 
   // Agenda
-  "agenda.title": { pt: "Agenda", en: "Agenda", es: "Agenda" },
-  "agenda.newEvent": { pt: "Novo Evento", en: "New Event", es: "Nuevo Evento" },
-  "agenda.today": { pt: "Hoje", en: "Today", es: "Hoy" },
+  "agenda.title": "Agenda",
+  "agenda.newEvent": "Novo Evento",
+  "agenda.today": "Hoje",
 
   // Chat
-  "chat.title": { pt: "Chat Interno", en: "Internal Chat", es: "Chat Interno" },
-  "chat.online": { pt: "Online", en: "Online", es: "En Línea" },
-  "chat.typeMessage": { pt: "Digite uma mensagem...", en: "Type a message...", es: "Escribe un mensaje..." },
+  "chat.title": "Chat Interno",
+  "chat.online": "Online",
+  "chat.typeMessage": "Digite uma mensagem...",
 
   // Messages
-  "messages.title": { pt: "Mensagens", en: "Messages", es: "Mensajes" },
-  "messages.inbox": { pt: "Caixa de Entrada", en: "Inbox", es: "Bandeja de Entrada" },
-  "messages.sent": { pt: "Enviados", en: "Sent", es: "Enviados" },
-  "messages.archived": { pt: "Arquivados", en: "Archived", es: "Archivados" },
-  "messages.compose": { pt: "Nova Mensagem", en: "New Message", es: "Nuevo Mensaje" },
+  "messages.title": "Mensagens",
+  "messages.inbox": "Caixa de Entrada",
+  "messages.sent": "Enviados",
+  "messages.archived": "Arquivados",
+  "messages.compose": "Nova Mensagem",
 
   // Teams
-  "teams.title": { pt: "Times", en: "Teams", es: "Equipos" },
-  "teams.members": { pt: "membros", en: "members", es: "miembros" },
+  "teams.title": "Times",
+  "teams.members": "membros",
 
   // Dates
-  "dates.title": { pt: "Datas Comemorativas", en: "Important Dates", es: "Fechas Importantes" },
-  "dates.birthdays": { pt: "Aniversários", en: "Birthdays", es: "Cumpleaños" },
-  "dates.companyDates": { pt: "Datas da Empresa", en: "Company Dates", es: "Fechas de la Empresa" },
+  "dates.title": "Datas Comemorativas",
+  "dates.birthdays": "Aniversários",
+  "dates.companyDates": "Datas da Empresa",
 
   // Common
-  "common.search": { pt: "Buscar...", en: "Search...", es: "Buscar..." },
-  "common.noData": { pt: "Nenhum dado encontrado", en: "No data found", es: "No se encontraron datos" },
-  "common.viewAll": { pt: "Ver Todos", en: "View All", es: "Ver Todos" },
-  "common.today": { pt: "Hoje", en: "Today", es: "Hoy" },
-  "common.tomorrow": { pt: "Amanhã", en: "Tomorrow", es: "Mañana" },
+  "common.search": "Buscar...",
+  "common.noData": "Nenhum dado encontrado",
+  "common.viewAll": "Ver Todos",
+  "common.today": "Hoje",
+  "common.tomorrow": "Amanhã",
 };
 
 interface I18nContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
+  language: string;
   t: (key: string) => string;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("pt");
-
   const t = (key: string): string => {
-    return translations[key]?.[language] || key;
+    return translations[key] || key;
   };
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
+    <I18nContext.Provider value={{ language: "pt", t }}>
       {children}
     </I18nContext.Provider>
   );
