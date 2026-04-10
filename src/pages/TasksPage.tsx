@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Plus, Filter, LayoutList, Columns3, Trash2, Clock, AlertCircle, CheckCircle2, PauseCircle, XCircle, Loader2, Calendar as CalendarIcon, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +44,8 @@ const statusConfig: Record<TaskStatus, { label: string; class: string; icon: any
 
 export default function TasksPage() {
   const { api } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "kanban">("kanban");
@@ -87,7 +90,14 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+    
+    // Check if we coming from Dashboard with a request to open the modal
+    if (location.state && (location.state as any).openNewModal) {
+      openNewModal();
+      // Clear state to avoid reopening on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

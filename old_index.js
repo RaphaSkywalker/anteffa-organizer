@@ -37,23 +37,6 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB
 });
 
-// Multer Storage for Documents
-const docStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/documents/');
-    },
-    filename: (req, file, cb) => {
-        const userId = req.user?.id || 'temp';
-        cb(null, `doc-${userId}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const uploadDocument = multer({
-    storage: docStorage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB
-});
-
-
 // Middleware for Auth
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -133,12 +116,6 @@ app.post('/api/upload-avatar', authenticateToken, upload.single('avatar'), async
     res.json({ avatar_url: avatarUrl });
 });
 
-app.post('/api/upload-document', authenticateToken, uploadDocument.single('file'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-    const fileUrl = `/uploads/documents/${req.file.filename}`;
-    res.json({ url: fileUrl });
-});
-
 app.post('/api/change-password', authenticateToken, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const { data: user } = await db.from('users').select('password').eq('id', req.user.id).single();
@@ -169,58 +146,6 @@ app.get('/api/admin/employees', authenticateToken, async (req, res) => {
     }));
     
     res.json(formatted);
-});
-
-// --- BULLETINS (MURAL) ROUTES ---
-
-app.get('/api/bulletins', authenticateToken, async (req, res) => {
-    try {
-        const { data: bulletins, error } = await db
-            .from('bulletins')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        res.json(bulletins);
-    } catch (e) {
-        console.error('[BULLETINS_ERROR]', e);
-        res.status(500).json({ error: 'Erro ao listar avisos' });
-    }
-});
-
-app.post('/api/admin/bulletins', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    try {
-        const { title, content, category } = req.body;
-        const { data, error } = await db.from('bulletins').insert({ title, content, category });
-        if (error) throw error;
-        res.json({ message: 'Aviso criado com sucesso', data });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-app.put('/api/admin/bulletins/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    try {
-        const { title, content, category } = req.body;
-        const { error } = await db.from('bulletins').update({ title, content, category }).eq('id', req.params.id);
-        if (error) throw error;
-        res.json({ message: 'Aviso atualizado com sucesso' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-app.delete('/api/admin/bulletins/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    try {
-        const { error } = await db.from('bulletins').delete().eq('id', req.params.id);
-        if (error) throw error;
-        res.json({ message: 'Aviso removido' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
 });
 
 app.get('/api/admin/employees/:id', authenticateToken, async (req, res) => {
@@ -364,20 +289,9 @@ app.get('/api/birthdays', authenticateToken, async (req, res) => {
         .from('birthdays')
         .select('*')
         .order('birth_date');
-
-    const { data: users } = await db.from('users').select('name, avatar_url');
     
-    // Injetar o avatar dinamicamente se o nome do usuário cadastrado no aniversário 
-    // corresponder a um usuário real no sistema com foto.
-    const enrichedBirthdays = (birthdays || []).map(b => {
-        const matchingUser = users?.find(u => u.name && u.name.trim().toLowerCase() === b.name.trim().toLowerCase());
-        return {
-            ...b,
-            avatar_url: matchingUser?.avatar_url || null
-        };
-    });
-    
-    res.json(enrichedBirthdays);
+    // In PostgreSQL, birth_date is DATE, in SQLite it was string. Supabase handles fine.
+    res.json(birthdays || []);
 });
 
 app.post('/api/admin/birthdays', authenticateToken, async (req, res) => {
@@ -424,153 +338,6 @@ app.delete('/api/admin/company-dates/:id', authenticateToken, async (req, res) =
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
     await db.from('company_dates').delete().eq('id', req.params.id);
     res.json({ message: 'Excluído' });
-});
-
-// --- MANAGEMENT & HR ROUTES ---
-
-app.get('/api/admin/management/stats', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    
-    const { month, year } = req.query;
-    try {
-        const start = `${year}-${month}-01`;
-        const end = new Date(parseInt(year), parseInt(month), 0).toISOString().split('T')[1] === 'T' ? `${year}-${month}-31` : new Date(parseInt(year), parseInt(month), 0).toISOString().split('T')[0];
-
-        // 1. Total Absences this month
-        const { data: absences } = await db.from('absences')
-            .select('*')
-            .gte('absence_date', start)
-            .lte('absence_date', end);
-
-        // 2. Total Medical Certificates this month
-        const { data: certs } = await db.from('medical_certificates')
-            .select('*')
-            .or(`and(start_date.gte.${start},start_date.lte.${end}),and(end_date.gte.${start},end_date.lte.${end})`);
-
-        // 3. Time Log Aggregates for all employees
-        const { data: logs } = await db.from('time_logs')
-            .select('*')
-            .gte('punch_date', start)
-            .lte('punch_date', end);
-
-        // Simple hour calculation logic (shared concept with Ponto stats)
-        const dailyData = {};
-        logs.forEach(log => {
-            const key = `${log.user_id}-${log.punch_date}`;
-            if (!dailyData[key]) dailyData[key] = [];
-            dailyData[key].push(log);
-        });
-
-        let totalPositive = 0;
-        let totalNegative = 0;
-        const PREVISTO_DIARIO = 8; // Assuming 8h days
-
-        Object.values(dailyData).forEach((dayLogs) => {
-            let totalMinutes = 0;
-            const timeToMinutes = (t) => {
-                const [h, m] = t.split(':').map(Number);
-                return h * 60 + m;
-            };
-
-            const findLog = (type) => dayLogs.find((l) => l.punch_type === type);
-            const ent = findLog('entrada');
-            const almS = findLog('almoco_saida');
-            const almR = findLog('almoco_retorno');
-            const sai = findLog('saida');
-
-            if (ent && sai) {
-                if (almS && almR) {
-                    totalMinutes = (timeToMinutes(almS.punch_time) - timeToMinutes(ent.punch_time)) + 
-                                   (timeToMinutes(sai.punch_time) - timeToMinutes(almR.punch_time));
-                } else {
-                    totalMinutes = (timeToMinutes(sai.punch_time) - timeToMinutes(ent.punch_time));
-                }
-            }
-
-            const hours = totalMinutes / 60;
-            const diff = hours - PREVISTO_DIARIO;
-            if (diff > 0) totalPositive += diff;
-            else if (diff < 0) totalNegative += Math.abs(diff);
-        });
-
-        res.json({
-            total_absences: absences?.length || 0,
-            total_certificates: certs?.length || 0,
-            total_positive_hours: parseFloat(totalPositive.toFixed(1)),
-            total_negative_hours: parseFloat(totalNegative.toFixed(1))
-        });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Absences CRUD (Admin & Pessoal)
-app.get('/api/absences/my', authenticateToken, async (req, res) => {
-    const { data } = await db.from('absences').select('*').eq('user_id', req.user.id).order('absence_date', { ascending: false });
-    res.json(data || []);
-});
-
-app.post('/api/absences', authenticateToken, async (req, res) => {
-    const { absence_date, end_date, reason, category, attachment_url, metadata } = req.body;
-    await db.from('absences').insert({
-        user_id: req.user.id,
-        absence_date,
-        end_date,
-        reason,
-        category,
-        attachment_url,
-        metadata: metadata || null,
-        status: 'Pendente'
-    });
-    res.json({ message: 'Justificativa enviada com sucesso!' });
-});
-
-app.delete('/api/absences/:id', authenticateToken, async (req, res) => {
-    try {
-        const { data: absence } = await db.from('absences').select('status, user_id').eq('id', req.params.id).single();
-        if (!absence) return res.status(404).json({ error: 'Registro não encontrado' });
-        if (absence.user_id !== req.user.id) return res.status(403).json({ error: 'Acesso negado' });
-        if (absence.status !== 'Negado') return res.status(400).json({ error: 'Apenas registros negados podem ser excluídos' });
-
-        await db.from('absences').delete().eq('id', req.params.id);
-        res.json({ message: 'Registro excluído com sucesso!' });
-    } catch (e) {
-        res.status(500).json({ error: 'Erro ao excluir registro' });
-    }
-});
-
-app.get('/api/admin/absences', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    const { data } = await db.from('absences').select('*, users(name)').order('absence_date', { ascending: false });
-    res.json(data || []);
-});
-
-app.post('/api/admin/absences', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    const { user_id, absence_date, end_date, reason, category, attachment_url, metadata, status } = req.body;
-    await db.from('absences').insert({ user_id, absence_date, end_date, reason, category, attachment_url, metadata: metadata || null, status: status || 'Pendente' });
-    res.json({ message: 'Falta registrada' });
-});
-
-app.put('/api/admin/absences/:id/status', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin' && req.user.team_name !== 'Financeiro' && req.user.team_name !== 'Presidência') return res.status(403).json({ error: 'Acesso negado' });
-    const { status } = req.body;
-    await db.from('absences').update({ status }).eq('id', req.params.id);
-    res.json({ message: 'Status atualizado com sucesso' });
-});
-
-// Certificates CRUD
-app.get('/api/admin/medical-certificates', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    const { data } = await db.from('medical_certificates').select('*, users(name)').order('start_date', { ascending: false });
-    res.json(data || []);
-});
-
-app.post('/api/admin/medical-certificates', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
-    const { user_id, start_date, end_date, description } = req.body;
-    await db.from('medical_certificates').insert({ user_id, start_date, end_date, description });
-    res.json({ message: 'Atestado registrado' });
 });
 
 // --- AGENDA ---
@@ -660,9 +427,8 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
 
 app.get(['/api/time-logs', '/api/time-log'], authenticateToken, async (req, res) => {
     try {
-        const { date, userId } = req.query; // optional specific date/user
-        const targetUserId = (req.user.role === 'admin' && userId) ? userId : req.user.id;
-        let query = db.from('time_logs').select('*').eq('user_id', targetUserId);
+        const { date } = req.query; // optional specific date
+        let query = db.from('time_logs').select('*').eq('user_id', req.user.id);
         
         if (date) {
             query = query.eq('punch_date', date);
@@ -747,10 +513,8 @@ app.post(['/api/time-logs/finalize', '/api/time-log/finalize'], authenticateToke
 });
 
 app.get(['/api/time-logs/stats', '/api/time-log/stats'], authenticateToken, async (req, res) => {
-    const { month, year, userId } = req.query; // format e.g. 04, 2026
+    const { month, year } = req.query; // format e.g. 04, 2026
     try {
-        const targetUserId = (req.user.role === 'admin' && userId) ? userId : req.user.id;
-        
         // Correct date range calculation
         const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
         const endDate = new Date(parseInt(year), parseInt(month), 0); // Last day of month
@@ -760,7 +524,7 @@ app.get(['/api/time-logs/stats', '/api/time-log/stats'], authenticateToken, asyn
 
         const { data: logs } = await db.from('time_logs')
             .select('*')
-            .eq('user_id', targetUserId)
+            .eq('user_id', req.user.id)
             .gte('punch_date', start)
             .lte('punch_date', end)
             .order('punch_date', { ascending: true })

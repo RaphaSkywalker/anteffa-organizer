@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/contexts/I18nContext";
 import {
   CheckSquare,
@@ -18,7 +19,10 @@ import {
   Bell,
   MoreVertical,
   Play,
-  Download
+  Download,
+  Megaphone,
+  Star,
+  Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,6 +126,7 @@ function DonezoStatCard({
 export default function Dashboard() {
   const { t } = useI18n();
   const { user, api } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ employees: 0, tasks: 0, meetings: 0, messages: 0, reminders: 0, completed: 0, total: 0 });
   const [birthdays, setBirthdays] = useState<any[]>([]);
   const [pendingTasksList, setPendingTasksList] = useState<Task[]>([]);
@@ -130,18 +135,31 @@ export default function Dashboard() {
   const [teamMembersList, setTeamMembersList] = useState<User[]>([]);
   
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<'noticia' | 'beneficio' | 'aviso'>('noticia');
+  const [allBulletins, setAllBulletins] = useState<any[]>([]);
+
+  const getCategoryIcon = (cat: string) => {
+    switch (cat) {
+      case 'noticia': return Megaphone;
+      case 'beneficio': return Star;
+      case 'aviso': return AlertCircle;
+      default: return Info;
+    }
+  };
 
   const fetchDashboardData = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const [bdays, empsData, allTasks, allEvents, mailData] = await Promise.all([
+      const [bdays, empsData, allTasks, allEvents, mailData, bulls] = await Promise.all([
         api("/api/birthdays"),
         api("/api/admin/employees").catch(() => api("/api/employees")),
         api("/api/tasks").catch(() => []),
         api("/api/agenda").catch(() => []),
-        api("/api/mail?tab=inbox").catch(() => [])
+        api("/api/mail?tab=inbox").catch(() => []),
+        api("/api/bulletins").catch(() => [])
       ]);
 
+      setAllBulletins(bulls || []);
       setBirthdays(bdays.slice(0, 5));
       setTeamMembersList(empsData.slice(0, 4));
 
@@ -197,7 +215,10 @@ export default function Dashboard() {
          </motion.div>
          
          <motion.div {...fadeIn(0.1)} className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-bold text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <button 
+              onClick={() => navigate('/tasks', { state: { openNewModal: true } })}
+              className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-bold text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
                <Plus className="w-4 h-4" />
                Adicionar Tarefa
             </button>
@@ -278,38 +299,95 @@ export default function Dashboard() {
             </div>
          </motion.div>
 
-         {/* Floating Activity Tracker Style (Moved Up) */}
-         <motion.div {...fadeIn(0.55)} className="bg-primary rounded-[1.25rem] border border-primary p-8 text-primary-foreground relative overflow-hidden group h-full">
+         {/* Mural ANTEFFA System with Tabs */}
+         <motion.div {...fadeIn(0.55)} className="bg-primary rounded-[1.25rem] border border-primary p-8 text-primary-foreground relative overflow-hidden group h-full shadow-2xl shadow-primary/30">
             <div className="relative z-10 flex flex-col h-full">
-               <h3 className="text-xl font-bold opacity-80">Rastreador Local</h3>
-               
-               <div className="flex-1 flex flex-col items-center justify-center py-6">
-                  <div className="text-4xl font-black tracking-tighter mb-4 animate-pulse">02:24:08</div>
-                  <div className="flex gap-4">
-                     <button className="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all outline-none">
-                        <X className="w-6 h-6 fill-current" />
-                     </button>
-                     <button className="w-12 h-12 bg-white/20 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all outline-none">
-                        <Calendar className="w-5 h-5 fill-current" />
-                     </button>
+               <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold tracking-tight">Mural ANTEFFA</h3>
+                  
+                  {/* Category Tabs */}
+                  <div className="flex bg-black/10 p-1 rounded-xl backdrop-blur-md border border-white/10 shadow-inner">
+                    {[
+                      { id: 'noticia', icon: Megaphone, label: 'Notícias' },
+                      { id: 'beneficio', icon: Star, label: 'Benefícios' },
+                      { id: 'aviso', icon: AlertCircle, label: 'Avisos' }
+                    ].map((cat) => (
+                      <button 
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id as any)}
+                        title={cat.label}
+                        className={cn(
+                          "p-2 rounded-lg transition-all duration-300 relative",
+                          activeCategory === cat.id 
+                            ? "bg-white text-primary shadow-lg scale-105" 
+                            : "text-white/60 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        <cat.icon className="w-4 h-4" />
+                        {activeCategory === cat.id && (
+                          <motion.div layoutId="mural-tab" className="absolute inset-0 bg-white rounded-lg z-[-1]" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                        )}
+                      </button>
+                    ))}
                   </div>
                </div>
+               
+               <div className="flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={activeCategory}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="space-y-3"
+                  >
+                    {allBulletins.filter(b => b.category === activeCategory).length > 0 ? (
+                      allBulletins.filter(b => b.category === activeCategory).slice(0, 3).map((bul) => {
+                        const Icon = getCategoryIcon(bul.category);
+                        return (
+                          <div key={bul.id} className="group/item cursor-pointer flex items-start gap-4 p-4 rounded-2xl hover:bg-white/15 transition-all border border-transparent hover:border-white/10 shadow-sm hover:shadow-md">
+                             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                                <Icon className="w-5 h-5" />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold leading-tight line-clamp-2 mb-1">{bul.title}</p>
+                                <div className="flex items-center gap-2 mt-1 opacity-70">
+                                   <span className="text-[10px] font-black uppercase tracking-widest">{bul.category === 'noticia' ? 'Notícia' : bul.category === 'beneficio' ? 'Benefício' : 'Aviso'}</span>
+                                   <span className="w-1 h-1 rounded-full bg-white/40" />
+                                   <span className="text-[10px]">{safeDate(bul.created_at).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                             </div>
+                             <ArrowUpRight className="w-4 h-4 opacity-0 group-hover/item:opacity-100 transition-opacity mt-1" />
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="h-48 flex flex-col items-center justify-center text-center opacity-40 space-y-2">
+                        <div className="w-12 h-12 rounded-full border border-dashed border-white/50 flex items-center justify-center">
+                          <Plus className="w-6 h-6" />
+                        </div>
+                        <p className="text-[11px] font-bold uppercase tracking-widest">Nenhum aviso nesta categoria</p>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+               </div>
 
-               <div className="mt-auto pt-6 border-t border-white/20">
-                  <div className="flex items-center justify-between">
-                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black opacity-60 uppercase tracking-widest">Equipe Atual</span>
-                        <span className="text-sm font-bold">Administração Sede</span>
-                     </div>
-                     <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+               <div className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between group/link cursor-pointer">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80 group-hover/link:opacity-100 transition-opacity">Ver todos os avisos</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                </div>
             </div>
 
-            {/* Visual background waves */}
+            {/* Visual background aesthetics */}
             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white/5 blur-3xl rounded-full" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50" />
+            <div className="absolute -top-10 -left-10 w-48 h-48 bg-black/10 blur-3xl rounded-full" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-30" />
          </motion.div>
+
 
          {/* Reminders Card */}
          <motion.div {...fadeIn(0.4)} className="bg-card rounded-[1.25rem] border border-border p-8 h-full">

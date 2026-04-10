@@ -12,7 +12,7 @@ const translations: Translations = {
   "nav.tasks": "Tarefas",
   "nav.chat": "Chat",
   "nav.messages": "Mensagens",
-  "nav.teams": "Times",
+  "nav.teams": "Equipes",
   "nav.dates": "Datas",
   "nav.admin": "Admin",
   "nav.settings": "Configurações",
@@ -52,6 +52,9 @@ const translations: Translations = {
   "chat.online": "Online",
   "chat.typeMessage": "Digite uma mensagem...",
 
+  // VideoChat
+  "nav.videochat": "VideoChamada",
+
   // Messages
   "messages.title": "Mensagens",
   "messages.inbox": "Caixa de Entrada",
@@ -60,7 +63,7 @@ const translations: Translations = {
   "messages.compose": "Nova Mensagem",
 
   // Teams
-  "teams.title": "Times",
+  "teams.title": "Equipes",
   "teams.members": "membros",
 
   // Dates

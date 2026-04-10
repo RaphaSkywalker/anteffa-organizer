@@ -45,7 +45,7 @@ export default function TeamsPage() {
             <LayoutGrid className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Equipes & Times</h1>
+            <h1 className="text-2xl font-bold text-foreground">Equipes</h1>
             <p className="text-sm text-muted-foreground italic">Visualização dos colaboradores agrupados por equipe</p>
           </div>
         </div>

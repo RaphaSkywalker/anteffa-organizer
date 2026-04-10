@@ -31,8 +31,7 @@ import {
   ResponsiveContainer, 
   CartesianGrid
 } from 'recharts';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { exportEmployeePDF } from "@/lib/reportUtils";
 import { 
   Dialog, 
   DialogContent, 
@@ -57,6 +56,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn, safeDate } from "@/lib/utils";
+import AbsenceSection from "@/components/AbsenceSection";
 
 interface TimeLog {
   id: number;
@@ -649,6 +649,11 @@ export default function PontoPage() {
             </div>
         </motion.div>
 
+        {/* Módulo Pessoal de Justificativa de Faltas Aninhada */}
+        <motion.div {...fadeIn} className="lg:col-span-12">
+            <AbsenceSection />
+        </motion.div>
+
         <motion.div {...fadeIn} className="lg:col-span-12 glass-card p-8 rounded-[2rem] border border-border/50 bg-primary/5">
             <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-3">Dica de Segurança</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -729,230 +734,8 @@ const EditTimeDialog = ({ log, value, onOpenChange, onChange, onSave }: any) => 
 };
 
 const ReportModal = ({ open, onOpenChange, user, todayLogs, monthlyStats, selectedDate }: any) => {
-  const [gpdLogo, setGpdLogo] = useState<string | null>(null);
-  const [footerLogo, setFooterLogo] = useState<string | null>(null);
-  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      const fetchAsset = async (url: string, callback: (res: string) => void) => {
-        try {
-          // Use absolute path to avoid potential fetch issues in some browser/env configs
-          const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
-          const response = await fetch(fullUrl);
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          reader.onloadend = () => callback(reader.result as string);
-          reader.readAsDataURL(blob);
-        } catch (e) {
-          console.error(`[PDF Asset Error] Falha ao carregar: ${url}`, e);
-        }
-      };
-
-      fetchAsset('/logo-gpd.jpg', setGpdLogo);
-      fetchAsset('/logo-anteffa-footer.png', setFooterLogo);
-      
-      if (user?.avatar_url) {
-        fetchAsset(user.avatar_url.startsWith('http') ? user.avatar_url : `http://${window.location.hostname}:3001${user.avatar_url}`, setAvatarBase64);
-      } else {
-        fetchAsset(`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=random&size=128`, setAvatarBase64);
-      }
-    }
-  }, [open, user]);
-
-  const exportPDF = (type: 'daily' | 'monthly') => {
-    const doc = new jsPDF();
-    const titleText = type === 'daily' ? 'Folha de Ponto Diária' : 'Folha de Ponto Mensal';
-    const userLogin = (user?.name || 'usuario').split(' ')[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // First name sanitized
-    const dateFormatted = selectedDate.toISOString().split('T')[0];
-    const period = type === 'daily' ? 'dia' : 'mes';
-    const filename = `${userLogin}_ponto_${period}_${dateFormatted}.pdf`;
-
-    // 1. Header: Avatar & Info (LEFT) - ALIGNED WITH LOGO
-    if (avatarBase64) {
-      try {
-        // Draw image frame
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.5);
-        doc.rect(14, 12, 20, 20, 'S');
-        doc.addImage(avatarBase64, 'JPEG', 14.5, 12.5, 19, 19);
-      } catch (e) { 
-        console.error("PDF Profile Image Error:", e); 
-      }
-    }
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(30, 41, 59);
-    doc.text(user?.name || 'Colaborador', 38, 19);
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text(user?.team_name || 'Equipe não informada', 38, 24);
-
-    // 2. Header: Logo ANTEFFA (RIGHT) - Reduced by 20% per request
-    if (footerLogo) {
-      doc.addImage(footerLogo, 'PNG', 163, 12, 32, 0);
-    }
-
-    // 3. Document Title
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(30, 41, 59);
-    doc.text(titleText, 105, 50, { align: 'center' });
-
-    // 4. Metrics Configuration (DAILY)
-    const cardsStartY = 58;
-    const cardsStartX = 14;
-    const cardWidth = 60;
-    const cardHeight = 18;
-
-    const tableData = type === 'daily' 
-      ? [[
-          `${new Date().getDate()}/${(selectedDate.getMonth()+1).toString().padStart(2, '0')} (${new Date().toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')})`,
-          '08:00 - 18:00',
-          todayLogs.find((l: any) => l.punch_type === 'entrada')?.punch_time.substring(0, 5) || '--:--',
-          todayLogs.find((l: any) => l.punch_type === 'almoco_saida')?.punch_time.substring(0, 5) || '--:--',
-          todayLogs.find((l: any) => l.punch_type === 'almoco_retorno')?.punch_time.substring(0, 5) || '--:--',
-          todayLogs.find((l: any) => l.punch_type === 'saida')?.punch_time.substring(0, 5) || '--:--',
-          'Calculando...'
-        ]]
-      : monthlyStats.map((s: any) => {
-          const dateObj = new Date(s.date + 'T12:00:00'); // Midday to avoid TZ issues
-          const dayName = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-          return [
-            `${s.day}/${(selectedDate.getMonth()+1).toString().padStart(2, '0')} (${dayName})`,
-            '08:00 - 18:00',
-            s.punches?.entrada || '--:--',
-            s.punches?.almoco_saida || '--:--',
-            s.punches?.almoco_retorno || '--:--',
-            s.punches?.saida || '--:--',
-            `${s.hours}h`
-          ];
-        });
-
-    // For daily, we need a simple calculation of today's total
-    if (type === 'daily') {
-        const timeToMin = (t: string) => {
-            if (!t || t === '--:--') return 0;
-            const [h, m] = t.split(':').map(Number);
-            return h * 60 + m;
-        };
-        const ent1 = timeToMin(todayLogs.find((l: any) => l.punch_type === 'entrada')?.punch_time || '');
-        const sai1 = timeToMin(todayLogs.find((l: any) => l.punch_type === 'almoco_saida')?.punch_time || '');
-        const ent2 = timeToMin(todayLogs.find((l: any) => l.punch_type === 'almoco_retorno')?.punch_time || '');
-        const sai2 = timeToMin(todayLogs.find((l: any) => l.punch_type === 'saida')?.punch_time || '');
-        
-        let totalToday = 0;
-        if (ent1 && sai1) totalToday += (sai1 - ent1);
-        if (ent2 && sai2) totalToday += (sai2 - ent2);
-        const totalHours = (totalToday / 60).toFixed(1);
-        tableData[0][6] = `${totalHours}h`;
-
-        const totalHoursNum = parseFloat(totalHours);
-        const dailyTarget = 8.0;
-        const saldo = totalHoursNum - dailyTarget;
-
-        // Metric 1: Total Hoje (Gray)
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(cardsStartX, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(100); doc.text("Total Hoje", cardsStartX + 5, cardsStartY + 6);
-        doc.setFontSize(11); doc.setTextColor(0); doc.text(`${totalHours}h`, cardsStartX + 5, cardsStartY + 13);
-
-        // Metric 2: Previsto Dia (Gray)
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(cardsStartX + cardWidth + 3, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(100); doc.text("Previsto Dia", cardsStartX + cardWidth + 8, cardsStartY + 6);
-        doc.setFontSize(11); doc.setTextColor(0); doc.text(`8.0h`, cardsStartX + cardWidth + 8, cardsStartY + 13);
-
-        // Metric 3: Saldo Dia (Dynamic)
-        let fillColor = [230, 230, 255]; // Blue (Default positive)
-        let textColor = [30, 30, 150];
-        if (saldo < 0) { fillColor = [255, 230, 230]; textColor = [150, 30, 30]; }
-        else if (saldo === 0) { fillColor = [230, 255, 230]; textColor = [30, 150, 30]; }
-
-        doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
-        doc.roundedRect(cardsStartX + (cardWidth * 2) + 6, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(textColor[0], textColor[1], textColor[2]); 
-        doc.text("Saldo Dia", cardsStartX + (cardWidth * 2) + 11, cardsStartY + 6);
-        doc.setFontSize(11); doc.text(`${saldo >= 0 ? '+' : ''}${saldo.toFixed(1)}h`, cardsStartX + (cardWidth * 2) + 11, cardsStartY + 13);
-
-        autoTable(doc, {
-            startY: 85,
-            head: [['DIA', 'HORÁRIO', 'ENT. 1', 'SAI. 1', 'ENT. 2', 'SAI. 2', 'TOTAL']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: { fillColor: [30, 41, 59], textColor: 255 },
-            styles: { fontSize: 8, cellPadding: 3 },
-            alternateRowStyles: { fillColor: [240, 248, 255] }
-        });
-    } else if (type === 'monthly') {
-      const totalWorked = monthlyStats.reduce((acc: number, curr: any) => acc + curr.hours, 0);
-      const totalPrevisto = 176; 
-      const saldo = totalWorked - totalPrevisto;
-
-      const tableHeaders = [['DIA', 'HORÁRIO', 'ENT. 1', 'SAI. 1', 'ENT. 2', 'SAI. 2', 'TOTAL']];
-
-      // Metric 1: Total Trabalhado (Gray)
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(cardsStartX, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-      doc.setFontSize(7); doc.setTextColor(100); doc.text("Total Trabalhado", cardsStartX + 5, cardsStartY + 6);
-      doc.setFontSize(11); doc.setTextColor(0); doc.text(`${totalWorked.toFixed(1)}h`, cardsStartX + 5, cardsStartY + 13);
-
-      // Metric 2: Total Previsto (Gray) - Explicitly setting color again
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(cardsStartX + cardWidth + 3, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-      doc.setFontSize(7); doc.setTextColor(100); doc.text("Total Previsto", cardsStartX + cardWidth + 8, cardsStartY + 6);
-      doc.setFontSize(11); doc.setTextColor(0); doc.text(`${totalPrevisto}h`, cardsStartX + cardWidth + 8, cardsStartY + 13);
-
-      let fillColor = [230, 230, 255];
-      let textColor = [30, 30, 150];
-      if (saldo < 0) { fillColor = [255, 230, 230]; textColor = [150, 30, 30]; }
-      else if (saldo === 0) { fillColor = [230, 255, 230]; textColor = [30, 150, 30]; }
-
-      doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
-      doc.roundedRect(cardsStartX + (cardWidth * 2) + 6, cardsStartY, cardWidth, cardHeight, 2, 2, 'F');
-      doc.setFontSize(7); doc.setTextColor(textColor[0], textColor[1], textColor[2]); 
-      doc.text("Saldo Mensal", cardsStartX + (cardWidth * 2) + 11, cardsStartY + 6);
-      doc.setFontSize(11); doc.text(`${saldo >= 0 ? '+' : ''}${saldo.toFixed(1)}h`, cardsStartX + (cardWidth * 2) + 11, cardsStartY + 13);
-      
-      doc.setTextColor(30, 41, 59);
-      autoTable(doc, {
-        startY: 85,
-        head: tableHeaders,
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 8 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        columnStyles: { 0: { fontStyle: 'bold' }, 6: { fontStyle: 'bold' } },
-        alternateRowStyles: { fillColor: [240, 248, 255] }
-      });
-    }
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        const pageHeight = doc.internal.pageSize.height;
-        
-        doc.setDrawColor(240, 240, 240);
-        doc.line(14, pageHeight - 30, 196, pageHeight - 30);
-
-        // Left Footer Logo (GPD) - Swapped per request
-        if (gpdLogo) {
-            doc.addImage(gpdLogo, 'JPEG', 14, pageHeight - 25, 25, 0);
-        }
-
-        doc.setFontSize(8);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(100);
-        doc.text("ADM ANTEFFA", 196, pageHeight - 23, { align: 'right' });
-        doc.setFont("helvetica", "normal");
-        doc.text("Gestão Digital de Ponto", 196, pageHeight - 19, { align: 'right' });
-    }
-
-    doc.save(filename);
+  const handleExport = (type: 'daily' | 'monthly') => {
+    exportEmployeePDF(type, user, todayLogs, monthlyStats, selectedDate);
     toast.success(`PDF ${type === 'daily' ? 'Diário' : 'Mensal'} gerado com sucesso!`);
   };
 
@@ -983,7 +766,7 @@ const ReportModal = ({ open, onOpenChange, user, todayLogs, monthlyStats, select
                    <h4 className="font-black text-sm uppercase tracking-tight">Grade Diária</h4>
                    <p className="text-[10px] text-muted-foreground">Consolidado das batidas de hoje</p>
                 </div>
-                <button onClick={() => exportPDF('daily')} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
+                <button onClick={() => handleExport('daily')} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
                   <FileDown className="w-4 h-4" /> Exportar PDF
                 </button>
               </div>
@@ -1043,7 +826,7 @@ const ReportModal = ({ open, onOpenChange, user, todayLogs, monthlyStats, select
                    <h4 className="font-black text-sm uppercase tracking-tight">Grade Mensal</h4>
                    <p className="text-[10px] text-muted-foreground">Consolidado de horas e batidas individuais</p>
                 </div>
-                <button onClick={() => exportPDF('monthly')} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
+                <button onClick={() => handleExport('monthly')} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
                   <FileDown className="w-4 h-4" /> Exportar PDF
                 </button>
               </div>

@@ -12,6 +12,7 @@ import PontoPage from "@/pages/PontoPage";
 import AgendaPage from "@/pages/AgendaPage";
 import TasksPage from "@/pages/TasksPage";
 import ChatPage from "@/pages/ChatPage";
+import VideoChatPage from "@/pages/VideoChatPage";
 import MessagesPage from "@/pages/MessagesPage";
 import TeamsPage from "@/pages/TeamsPage";
 import DatesPage from "@/pages/DatesPage";
@@ -51,6 +52,7 @@ const App = () => (
                   <Route path="/agenda" element={<AgendaPage />} />
                   <Route path="/tasks" element={<TasksPage />} />
                   <Route path="/chat" element={<ChatPage />} />
+                  <Route path="/videochat" element={<VideoChatPage />} />
                   <Route path="/messages" element={<MessagesPage />} />
                   <Route path="/teams" element={<TeamsPage />} />
                   <Route path="/dates" element={<DatesPage />} />

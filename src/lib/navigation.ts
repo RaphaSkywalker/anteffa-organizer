@@ -9,6 +9,7 @@ import {
   PartyPopper,
   Shield,
   Settings,
+  Video
 } from "lucide-react";
 
 export const navItems = [
@@ -17,6 +18,7 @@ export const navItems = [
   { key: "nav.agenda", path: "/agenda", icon: Calendar },
   { key: "nav.tasks", path: "/tasks", icon: CheckSquare },
   { key: "nav.chat", path: "/chat", icon: MessageCircle },
+  { key: "nav.videochat", path: "/videochat", icon: Video },
   { key: "nav.messages", path: "/messages", icon: Mail },
   { key: "nav.teams", path: "/teams", icon: Users },
   { key: "nav.dates", path: "/dates", icon: PartyPopper },

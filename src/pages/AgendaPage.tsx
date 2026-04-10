@@ -124,79 +124,76 @@ export default function AgendaPage() {
         </button>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Events List */}
-        <motion.div {...fadeIn} className="lg:col-span-2 space-y-4">
-          <div className="glass-card rounded-[2rem] border border-border overflow-hidden shadow-xl">
-            <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
-              <h2 className="font-bold text-foreground flex items-center gap-2">
-                <Bell className="w-4 h-4 text-primary" /> Próximos Eventos
-              </h2>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">        <div className="lg:col-span-2 space-y-6">
+          <motion.div {...fadeIn} className="space-y-4">
+            <div className="glass-card rounded-[2rem] border border-border overflow-hidden shadow-xl">
+              <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-primary" /> Próximos Eventos
+                </h2>
+              </div>
 
-            <div className="divide-y divide-border min-h-[400px]">
-              {loading ? (
-                <div className="flex flex-col items-center justify-center h-full py-20 opacity-50">
-                  <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                  <p className="text-sm font-medium">Carregando compromissos...</p>
-                </div>
-              ) : events.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center px-10">
-                  <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
-                    <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+              <div className="divide-y divide-border min-h-[400px]">
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center h-full py-20 opacity-50">
+                    <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+                    <p className="text-sm font-medium">Carregando compromissos...</p>
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">Sua agenda está limpa!</h3>
-                  <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-2 italic">
-                    Clique em "Novo Evento" para começar a organizar sua rotina.
-                  </p>
-                </div>
-              ) : (
-                events.map((event) => (
-                  <div key={event.id} className="group p-5 hover:bg-muted/30 transition-all flex items-start gap-4 relative">
-                    <div className="w-1.5 h-12 rounded-full shrink-0" style={{ backgroundColor: event.color || '#3b82f6' }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${event.event_type === 'reuniao' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
-                          {event.event_type}
-                        </span>
-                        {event.recurrence !== 'none' && (
-                          <span className="flex items-center gap-1 text-[9px] text-muted-foreground font-bold">
-                            <RefreshCw className="w-2.5 h-2.5" /> Mensal (Dia {safeDate(event.start_date).getDate()})
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{event.title}</h3>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                        <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
-                          <CalendarIcon className="w-3.5 h-3.5" /> {safeDate(event.start_date).toLocaleDateString('pt-BR')}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
-                          <Clock className="w-3.5 h-3.5" /> {event.event_time}
-                        </span>
-                        {event.reminder_days > 0 && (
-                          <span className="flex items-center gap-1.5 text-[11px] text-accent font-bold">
-                            <Bell className="w-3.5 h-3.5" /> Aviso {event.reminder_days} dias antes
-                          </span>
-                        )}
-                      </div>
+                ) : events.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-24 text-center px-10">
+                    <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
+                      <CalendarIcon className="w-8 h-8 text-muted-foreground" />
                     </div>
-
-                    <button
-                      onClick={() => handleDelete(event.id)}
-                      className="opacity-0 group-hover:opacity-100 p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all shadow-sm shrink-0"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <h3 className="text-lg font-bold text-foreground">Sua agenda está limpa!</h3>
+                    <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-2 italic">
+                      Clique em "Novo Evento" para começar a organizar sua rotina.
+                    </p>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </motion.div>
+                ) : (
+                  events.map((event) => (
+                    <div key={event.id} className="group p-5 hover:bg-muted/30 transition-all flex items-start gap-4 relative">
+                      <div className="w-1.5 h-12 rounded-full shrink-0" style={{ backgroundColor: event.color || '#3b82f6' }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${event.event_type === 'reuniao' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
+                            {event.event_type}
+                          </span>
+                          {event.recurrence !== 'none' && (
+                            <span className="flex items-center gap-1 text-[9px] text-muted-foreground font-bold">
+                              <RefreshCw className="w-2.5 h-2.5" /> Mensal (Dia {safeDate(event.start_date).getDate()})
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{event.title}</h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+                          <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                            <CalendarIcon className="w-3.5 h-3.5" /> {safeDate(event.start_date).toLocaleDateString('pt-BR')}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                            <Clock className="w-3.5 h-3.5" /> {event.event_time}
+                          </span>
+                          {event.reminder_days > 0 && (
+                            <span className="flex items-center gap-1.5 text-[11px] text-accent font-bold">
+                              <Bell className="w-3.5 h-3.5" /> Aviso {event.reminder_days} dias antes
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-        {/* Sidebar Info & Calendar */}
-        <motion.div {...fadeIn} className="space-y-6">
-          <div className="glass-card rounded-[2rem] border border-border p-6 shadow-xl relative overflow-hidden">
+                      <button
+                        onClick={() => handleDelete(event.id)}
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all shadow-sm shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div {...fadeIn} className="glass-card rounded-[2rem] border border-border p-6 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 bg-primary/5 blur-3xl rounded-full -mr-10 -mt-10" />
             <h2 className="font-bold text-foreground mb-4 relative flex items-center gap-2">
               Resumo Semanal
@@ -211,8 +208,12 @@ export default function AgendaPage() {
                 <p className="text-xl font-black text-accent">{events.filter(e => e.recurrence !== 'none').length}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
+        </div>
 
+
+        {/* Sidebar Calendar Only */}
+        <motion.div {...fadeIn} className="space-y-6">
           <CalendarWidget events={events} companyDates={companyDates} />
         </motion.div>
       </div>
