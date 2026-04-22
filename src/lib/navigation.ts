@@ -9,7 +9,8 @@ import {
   PartyPopper,
   Shield,
   Settings,
-  Video
+  Video,
+  PieChart
 } from "lucide-react";
 
 export const navItems = [
@@ -21,6 +22,7 @@ export const navItems = [
   { key: "nav.videochat", path: "/videochat", icon: Video },
   { key: "nav.messages", path: "/messages", icon: Mail },
   { key: "nav.teams", path: "/teams", icon: Users },
+  { key: "nav.gestao", path: "/gestao", icon: PieChart },
   { key: "nav.dates", path: "/dates", icon: PartyPopper },
 ];
 

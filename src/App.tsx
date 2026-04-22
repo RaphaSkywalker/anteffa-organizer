@@ -15,6 +15,7 @@ import ChatPage from "@/pages/ChatPage";
 import VideoChatPage from "@/pages/VideoChatPage";
 import MessagesPage from "@/pages/MessagesPage";
 import TeamsPage from "@/pages/TeamsPage";
+import GestaoPage from "@/pages/GestaoPage";
 import DatesPage from "@/pages/DatesPage";
 import AdminPage from "@/pages/AdminPage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -55,6 +56,7 @@ const App = () => (
                   <Route path="/videochat" element={<VideoChatPage />} />
                   <Route path="/messages" element={<MessagesPage />} />
                   <Route path="/teams" element={<TeamsPage />} />
+                  <Route path="/gestao" element={<GestaoPage />} />
                   <Route path="/dates" element={<DatesPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/settings" element={<SettingsPage />} />

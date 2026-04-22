@@ -49,7 +49,12 @@ export function AppSidebar() {
         {!collapsed && (
            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-4 opacity-50">Menu</p>
         )}
-        {navItems.map((item) => {
+        {navItems.filter(item => {
+          if (item.key === "nav.gestao") {
+            return user?.team_name === "Financeiro" || user?.role === "admin" || user?.team_name === "Presidência";
+          }
+          return true;
+        }).map((item) => {
           const isActive =
             item.path === "/"
               ? location.pathname === "/"

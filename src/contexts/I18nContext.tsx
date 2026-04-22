@@ -16,6 +16,7 @@ const translations: Translations = {
   "nav.dates": "Datas",
   "nav.admin": "Admin",
   "nav.settings": "Configurações",
+  "nav.gestao": "Gestão",
 
   // Dashboard
   "dashboard.welcome": "Bom dia",

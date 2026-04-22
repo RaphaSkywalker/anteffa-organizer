@@ -157,7 +157,12 @@ export function AppLayout() {
                 className="absolute top-20 left-0 right-0 bg-card border-b border-border shadow-2xl z-40 lg:hidden overflow-hidden"
               >
                 <div className="p-6 space-y-1">
-                  {navItems.map((item) => {
+                  {navItems.filter(item => {
+                    if (item.key === "nav.gestao") {
+                      return user?.team_name === "Financeiro" || user?.role === "admin" || user?.team_name === "Presidência";
+                    }
+                    return true;
+                  }).map((item) => {
                     const isActive = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
                     return (
                       <NavLink
