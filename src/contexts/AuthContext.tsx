@@ -27,7 +27,14 @@ import { API_URL } from "@/config";
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(() => {
         const saved = localStorage.getItem("auth_user");
-        return saved ? JSON.parse(saved) : null;
+        if (!saved || saved === "undefined") return null;
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.error("Failed to parse auth_user from localStorage", e);
+            localStorage.removeItem("auth_user");
+            return null;
+        }
     });
     const [token, setToken] = useState<string | null>(() => {
         return localStorage.getItem("auth_token");
