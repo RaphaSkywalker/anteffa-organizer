@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postinstall": "npm run build && cd server && npm install",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
