@@ -1082,9 +1082,10 @@ app.put('/api/mail/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.use((req, res) => {
-    console.log(`404 NOT FOUND: ${req.method} ${req.url}`);
-    res.status(404).json({ error: `Rota não encontrada: ${req.method} ${req.url}` });
+app.use(express.static(path.join(__dirname, '../dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(PORT, () => {
