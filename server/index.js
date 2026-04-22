@@ -8,7 +8,7 @@ const db = require('./db');
 require('dotenv').config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const JWT_SECRET = 'anteffa_secret_key_2026';
 
 app.use(cors());
