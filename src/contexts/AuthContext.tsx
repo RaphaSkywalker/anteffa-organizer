@@ -41,14 +41,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const api = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-        const headers = {
+        // Always read token from localStorage to avoid stale closure after login
+        const currentToken = localStorage.getItem("auth_token");
+
+        const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(options.headers || {}),
+            ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+            ...(options.headers as Record<string, string> || {}),
         };
 
         if (options.body instanceof FormData) {
-            delete (headers as any)["Content-Type"];
+            delete headers["Content-Type"];
         }
 
         const response = await fetch(`${API_URL}${endpoint}`, {
@@ -71,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         return isJson ? response.json() : response.text();
-    }, [token]);
+    }, []);
 
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
