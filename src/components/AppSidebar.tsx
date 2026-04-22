@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 export function AppSidebar() {
   const { t } = useI18n();
   const { theme, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
