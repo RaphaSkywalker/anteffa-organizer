@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { Search, Bell, Mail, Command, ChevronDown, LogOut, Moon, Sun } from "lucide-react";
@@ -122,7 +123,7 @@ export function AppLayout() {
                 <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-xl bg-muted border-2 border-background shadow-md overflow-hidden shrink-0 group-hover:border-primary/30 transition-all">
                    {user?.avatar_url ? (
                       <img 
-                        src={`http://${window.location.hostname}:3001${user.avatar_url}`} 
+                        src={`${API_URL}${user.avatar_url}`} 
                         alt="Profile" 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

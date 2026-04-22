@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -26,7 +27,7 @@ export const exportEmployeePDF = async (type: 'daily' | 'monthly', user: any, lo
     const footerLogo = await getBase64('/logo-anteffa-footer.png');
     let avatarBase64 = null;
     if (user?.avatar_url) {
-        avatarBase64 = await getBase64(user.avatar_url.startsWith('http') ? user.avatar_url : `http://${window.location.hostname}:3001${user.avatar_url}`);
+        avatarBase64 = await getBase64(user.avatar_url.startsWith('http') ? user.avatar_url : `${API_URL}${user.avatar_url}`);
     }
 
     // Header

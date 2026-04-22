@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -146,7 +147,7 @@ const VideoChatPage = () => {
                {employees.slice(0, 3).map((p) => (
                  <Avatar key={p.id} className="border-2 border-background w-10 h-10 hover:z-10 relative transition-transform">
                     {p.avatar_url ? (
-                       <AvatarImage src={`http://${window.location.hostname}:3001${p.avatar_url}`} />
+                       <AvatarImage src={`${API_URL}${p.avatar_url}`} />
                     ) : (
                        <AvatarFallback>{(p.name || p.username || '?')[0]}</AvatarFallback>
                     )}
@@ -179,7 +180,7 @@ const VideoChatPage = () => {
             <div className="w-full h-full flex flex-col items-center justify-center bg-card/40">
               <Avatar className="w-32 h-32 mb-4 border-4 border-primary/20">
                 {user?.avatar_url ? (
-                   <AvatarImage src={`http://${window.location.hostname}:3001${user.avatar_url}`} />
+                   <AvatarImage src={`${API_URL}${user.avatar_url}`} />
                 ) : (
                    <AvatarFallback className="text-4xl bg-primary/20 text-primary">{user?.name?.[0] || 'U'}</AvatarFallback>
                 )}
@@ -327,7 +328,7 @@ const VideoChatPage = () => {
                <div className="flex items-center gap-3">
                  <Avatar className="w-10 h-10 border border-border">
                    {user?.avatar_url ? (
-                      <AvatarImage src={`http://${window.location.hostname}:3001${user.avatar_url}`} />
+                      <AvatarImage src={`${API_URL}${user.avatar_url}`} />
                    ) : (
                       <AvatarFallback className="bg-primary/20 text-primary">{user?.name?.[0] || 'U'}</AvatarFallback>
                    )}
@@ -356,7 +357,7 @@ const VideoChatPage = () => {
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10 border border-border">
                         {p.avatar_url ? (
-                           <AvatarImage src={`http://${window.location.hostname}:3001${p.avatar_url}`} />
+                           <AvatarImage src={`${API_URL}${p.avatar_url}`} />
                         ) : (
                            <AvatarFallback>{(p.name || p.username || '?')[0]}</AvatarFallback>
                         )}

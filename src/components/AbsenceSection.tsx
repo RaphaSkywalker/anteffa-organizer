@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -326,7 +327,7 @@ export default function AbsenceSection() {
                           </button>
                        )}
                        {h.attachment_url && (
-                          <a href={`http://${window.location.hostname}:3001${h.attachment_url}`} target="_blank" rel="noopener noreferrer" className="shrink-0 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-all">
+                          <a href={`${API_URL}${h.attachment_url}`} target="_blank" rel="noopener noreferrer" className="shrink-0 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-all">
                              <FileUp className="w-5 h-5" />
                           </a>
                        )}

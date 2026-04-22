@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useI18n } from "@/contexts/I18nContext";
 import { Send, Search, Circle, Pencil, Trash2, Hash, Users, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -310,7 +311,7 @@ export default function ChatPage() {
                       <div className="relative shrink-0">
                         <div className="w-10 h-10 md:w-8 md:h-8 rounded-full gradient-brand flex items-center justify-center text-[12px] md:text-[10px] font-bold text-primary-foreground shrink-0 overflow-hidden shadow-sm md:shadow-none">
                           {c.avatar_url ? (
-                            <img src={`http://${window.location.hostname}:3001${c.avatar_url}`} className="w-full h-full object-cover" />
+                            <img src={`${API_URL}${c.avatar_url}`} className="w-full h-full object-cover" />
                           ) : (
                             (c.name || c.username || "?").split(" ").map(w => w[0]).join("")
                           )}
@@ -356,7 +357,7 @@ export default function ChatPage() {
                 ) : (
                   <div className="w-9 h-9 rounded-2xl gradient-brand flex items-center justify-center text-primary-foreground font-bold shrink-0 overflow-hidden shadow-sm">
                     {activeChat.avatar_url ? (
-                      <img src={`http://${window.location.hostname}:3001${activeChat.avatar_url}`} className="w-full h-full object-cover" />
+                      <img src={`${API_URL}${activeChat.avatar_url}`} className="w-full h-full object-cover" />
                     ) : (
                       <div className="text-[10px] font-black uppercase">
                         {(activeChat.name || "?").split(" ").map(w => w[0]).join("")}

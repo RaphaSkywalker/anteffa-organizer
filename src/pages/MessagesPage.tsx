@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useI18n } from "@/contexts/I18nContext";
 import { Mail, Archive, Send as SendIcon, Plus, X, Search, CheckCircle2, User, Loader2, Reply, Trash2, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -245,9 +246,9 @@ export default function MessagesPage() {
                 >
                   <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-primary-foreground font-black shrink-0 overflow-hidden shadow-sm">
                     {tab === 'sent' ? (
-                      msg.to_avatar ? <img src={`http://${window.location.hostname}:3001${msg.to_avatar}`} className="w-full h-full object-cover" /> : msg.to_name?.[0]
+                      msg.to_avatar ? <img src={`${API_URL}${msg.to_avatar}`} className="w-full h-full object-cover" /> : msg.to_name?.[0]
                     ) : (
-                      msg.from_avatar ? <img src={`http://${window.location.hostname}:3001${msg.from_avatar}`} className="w-full h-full object-cover" /> : msg.from_name?.[0]
+                      msg.from_avatar ? <img src={`${API_URL}${msg.from_avatar}`} className="w-full h-full object-cover" /> : msg.from_name?.[0]
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -328,9 +329,9 @@ export default function MessagesPage() {
                   </button>
                   <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-primary-foreground font-black shrink-0 overflow-hidden shadow-md">
                     {tab === 'sent' ? (
-                      selectedMessage.to_avatar ? <img src={`http://${window.location.hostname}:3001${selectedMessage.to_avatar}`} className="w-full h-full object-cover" /> : selectedMessage.to_name?.[0]
+                      selectedMessage.to_avatar ? <img src={`${API_URL}${selectedMessage.to_avatar}`} className="w-full h-full object-cover" /> : selectedMessage.to_name?.[0]
                     ) : (
-                      selectedMessage.from_avatar ? <img src={`http://${window.location.hostname}:3001${selectedMessage.from_avatar}`} className="w-full h-full object-cover" /> : selectedMessage.from_name?.[0]
+                      selectedMessage.from_avatar ? <img src={`${API_URL}${selectedMessage.from_avatar}`} className="w-full h-full object-cover" /> : selectedMessage.from_name?.[0]
                     )}
                   </div>
                   <div>

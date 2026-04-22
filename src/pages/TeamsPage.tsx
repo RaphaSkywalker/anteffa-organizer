@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useState, useEffect } from "react";
 import { Users, MoreHorizontal, LayoutGrid, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -93,7 +94,7 @@ export default function TeamsPage() {
                             <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/30 transition-colors">
                               <div className="w-7 h-7 rounded-full gradient-brand flex items-center justify-center text-[10px] font-bold text-white shrink-0 overflow-hidden">
                                 {member.avatar_url ? (
-                                  <img src={`http://${window.location.hostname}:3001${member.avatar_url}`} className="w-full h-full object-cover" />
+                                  <img src={`${API_URL}${member.avatar_url}`} className="w-full h-full object-cover" />
                                 ) : member.name[0].toUpperCase()}
                               </div>
                               <div className="min-w-0">
@@ -124,7 +125,7 @@ export default function TeamsPage() {
                   <div key={member.id} className="glass-card rounded-2xl border border-border p-3 flex flex-col items-center text-center group hover:border-primary/30 transition-all">
                     <div className="w-12 h-12 rounded-full gradient-brand flex items-center justify-center text-sm font-bold text-white mb-2 shadow-md">
                       {member.avatar_url ? (
-                        <img src={`http://${window.location.hostname}:3001${member.avatar_url}`} className="w-full h-full object-cover rounded-full" />
+                        <img src={`${API_URL}${member.avatar_url}`} className="w-full h-full object-cover rounded-full" />
                       ) : member.name[0].toUpperCase()}
                     </div>
                     <p className="text-xs font-bold text-foreground truncate w-full">{member.name}</p>

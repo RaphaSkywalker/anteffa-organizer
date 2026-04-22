@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Users, Shield, Cake, Calendar, Trash2, Loader2, Search, PlusCircle, LayoutGrid, Edit3, XCircle, RefreshCw, CheckCircle2, ChevronDown, Megaphone, AlertCircle, TrendingUp, TrendingDown, FileText, ChevronRight, PieChart } from "lucide-react";
@@ -619,7 +620,7 @@ export default function AdminPage() {
                           <div className="flex items-center gap-2">
                              {abs.attachment_url && (
                                 <a 
-                                  href={`http://${window.location.hostname}:3001${abs.attachment_url}`} 
+                                  href={`${API_URL}${abs.attachment_url}`} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center hover:bg-card transition-all text-muted-foreground hover:text-primary mr-2"
@@ -670,7 +671,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-3 pl-2 flex-1 min-w-0">
                     <div className="w-11 h-11 rounded-xl gradient-brand flex items-center justify-center text-primary-foreground font-bold shrink-0 overflow-hidden shadow-md">
                       {item.avatar_url ? (
-                        <img src={`http://${window.location.hostname}:3001${item.avatar_url}`} className="w-full h-full object-cover" />
+                        <img src={`${API_URL}${item.avatar_url}`} className="w-full h-full object-cover" />
                       ) : (
                         (item.name || item.title || item.username || "U")[0].toUpperCase()
                       )}

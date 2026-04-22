@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Camera, Save, Key, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +12,7 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name || user?.username || "");
   const [email, setEmail] = useState(user?.email || "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user?.avatar_url ? `http://localhost:3001${user.avatar_url}` : null
+    user?.avatar_url ? `${API_URL}${user.avatar_url}` : null
   );
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -52,7 +53,7 @@ export default function SettingsPage() {
           method: "POST",
           body: formData,
         });
-        const fullAvatarUrl = `http://localhost:3001${data.avatar_url}`;
+        const fullAvatarUrl = `${API_URL}${data.avatar_url}`;
         setAvatarPreview(fullAvatarUrl);
         updateUser({ avatar_url: data.avatar_url });
         toast.success("Avatar atualizado com sucesso!");

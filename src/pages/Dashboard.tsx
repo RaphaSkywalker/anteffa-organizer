@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/contexts/I18nContext";
@@ -436,7 +437,7 @@ export default function Dashboard() {
                   <div key={i} className="flex items-center gap-4 group">
                      <div className="w-12 h-12 rounded-xl bg-muted border-2 border-background shadow-sm overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
                         {tm.avatar_url ? (
-                           <img src={`http://${window.location.hostname}:3001${tm.avatar_url}`} className="w-full h-full object-cover" />
+                           <img src={`${API_URL}${tm.avatar_url}`} className="w-full h-full object-cover" />
                         ) : (
                            <div className="w-full h-full gradient-brand flex items-center justify-center text-primary-foreground font-bold text-sm">
                               {tm.name[0].toUpperCase()}

@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import { useState, useEffect } from "react";
 import { useI18n } from "@/contexts/I18nContext";
 import { Cake, CalendarHeart, Send, RefreshCw } from "lucide-react";
@@ -91,7 +92,7 @@ export default function DatesPage() {
                   <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-primary-foreground font-black shrink-0 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
                     {b.avatar_url ? (
                       <img
-                        src={`http://${window.location.hostname}:3001${b.avatar_url}`}
+                        src={`${API_URL}${b.avatar_url}`}
                         className="w-full h-full object-cover"
                         alt={b.name}
                       />
