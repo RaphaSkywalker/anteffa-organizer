@@ -53,8 +53,6 @@ const VideoChatPage = () => {
   // Media controls states
   const [micEnabled, setMicEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
 
   // Fetch true employees
   useEffect(() => {
@@ -124,24 +122,8 @@ const VideoChatPage = () => {
     }
   }, [micEnabled, videoEnabled, stream]);
 
-  // Recording timer effect mock
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `00:${mins}:${secs}`;
-  };
-
   const toggleMic = () => setMicEnabled(!micEnabled);
   const toggleVideo = () => setVideoEnabled(!videoEnabled);
-  const toggleRecording = () => setIsRecording(!isRecording);
 
   // Remove endCall as it's no longer used
 
@@ -176,7 +158,7 @@ const VideoChatPage = () => {
                  </div>
                )}
             </div>
-            <Button variant="outline" className="bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 gap-2">
+             <Button variant="outline" className="bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 gap-2 hidden">
               <LinkIcon className="w-4 h-4" />
               cem-jnmt-hsu
             </Button>
@@ -210,12 +192,6 @@ const VideoChatPage = () => {
           )}
 
           {/* Overlays */}
-          {isRecording && (
-            <div className="absolute top-4 left-4 bg-card/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 border border-border">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-              <span className="text-sm font-semibold text-foreground tracking-widest">{formatTime(recordingTime)}</span>
-            </div>
-          )}
 
           <div className="absolute top-4 right-4 bg-card/50 hover:bg-card/80 transition p-2 rounded-xl backdrop-blur-sm cursor-pointer border border-border">
             <Maximize2 className="w-5 h-5 text-foreground" />
@@ -235,15 +211,15 @@ const VideoChatPage = () => {
         </div>
 
         {/* Thumbnails Row */}
-        <div className="h-32 mt-4 grid grid-cols-4 gap-4 shrink-0">
+        <div className="h-24 sm:h-32 mt-4 grid grid-cols-4 gap-2 md:gap-4 shrink-0 w-full">
           {isCallActive ? thumbnails.map((thumb) => (
             <div key={thumb.id} className="relative rounded-2xl overflow-hidden bg-muted/40 border border-border group">
               <img src={thumb.avatar} alt={thumb.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-medium text-foreground">
+              <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-md px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg text-[10px] md:text-xs font-medium text-foreground truncate max-w-[80%]">
                 {thumb.name}
               </div>
               <div className={cn(
-                "absolute bottom-2 right-2 p-1.5 rounded-full backdrop-blur-md",
+                "absolute bottom-2 right-1 md:right-2 p-1 md:p-1.5 rounded-full backdrop-blur-md",
                 thumb.micOn ? "bg-primary/80" : "bg-red-500/80"
               )}>
                 {thumb.micOn ? <Mic className="w-3 h-3 text-white" /> : <MicOff className="w-3 h-3 text-white" />}
@@ -252,25 +228,25 @@ const VideoChatPage = () => {
           )) : (
             [...Array(4)].map((_, i) => (
               <div key={i} className="relative rounded-2xl overflow-hidden bg-card/20 border border-border/50 flex flex-col items-center justify-center">
-                 <VideoOff className="w-6 h-6 text-muted-foreground/30 mb-2" />
-                 <p className="text-[9px] text-muted-foreground/50 font-black uppercase tracking-[0.2em]">Sem Sinal</p>
+                 <VideoOff className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground/30 mb-1 md:mb-2" />
+                 <p className="text-[7px] md:text-[9px] text-muted-foreground/50 font-black uppercase tracking-wider text-center px-1">Sem Sinal</p>
               </div>
             ))
           )}
         </div>
 
         {/* Bottom Tool Bar */}
-        <div className="mt-6 flex justify-center items-center gap-4 shrink-0">
+        <div className="mt-4 flex justify-between md:justify-center items-center gap-1.5 md:gap-4 shrink-0 w-full mb-1">
           <Button 
             onClick={toggleMic}
             variant="outline" 
             size="icon" 
             className={cn(
-              "w-12 h-12 rounded-full border-0 transition-all",
+              "w-10 h-10 md:w-12 md:h-12 rounded-full border-0 transition-all shrink-0",
               micEnabled ? "bg-primary/20 text-primary hover:bg-primary/30" : "bg-red-500 text-white hover:bg-red-600"
             )}
           >
-            {micEnabled ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+            {micEnabled ? <Mic className="w-5 h-5 md:w-6 md:h-6" /> : <MicOff className="w-5 h-5 md:w-6 md:h-6" />}
           </Button>
 
           <Button 
@@ -278,63 +254,43 @@ const VideoChatPage = () => {
             variant="outline" 
             size="icon" 
             className={cn(
-              "w-12 h-12 rounded-full border-0 transition-all",
+              "w-10 h-10 md:w-12 md:h-12 rounded-full border-0 transition-all shrink-0",
               videoEnabled ? "bg-primary/20 text-primary hover:bg-primary/30" : "bg-red-500 text-white hover:bg-red-600"
             )}
           >
-            {videoEnabled ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+            {videoEnabled ? <Video className="w-5 h-5 md:w-6 md:h-6" /> : <VideoOff className="w-5 h-5 md:w-6 md:h-6" />}
           </Button>
 
           <Button 
             variant="outline" 
             size="icon" 
-            className="w-12 h-12 rounded-full bg-muted/50 border-0 hover:bg-muted text-foreground transition-all"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted/50 border-0 hover:bg-muted text-foreground transition-all shrink-0"
           >
-            <MonitorUp className="w-6 h-6" />
-          </Button>
-
-          <Button 
-            onClick={toggleRecording}
-            variant="outline" 
-            size="icon" 
-            className={cn(
-              "w-12 h-12 rounded-full border-0 transition-all",
-              isRecording ? "bg-red-500/20 text-red-500 hover:bg-red-500/30 ring-2 ring-red-500/50 outline-none" : "bg-muted/50 hover:bg-muted text-foreground"
-            )}
-          >
-            <Circle className="w-6 h-6 fill-current" />
+            <MonitorUp className="w-5 h-5 md:w-6 md:h-6" />
           </Button>
 
           <Button 
             variant="outline" 
             size="icon" 
-            className="w-12 h-12 rounded-full bg-muted/50 border-0 hover:bg-muted text-foreground transition-all xl:hidden"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted/50 border-0 hover:bg-muted text-foreground transition-all xl:hidden shrink-0"
           >
-            <MessageSquare className="w-6 h-6" />
+            <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />
           </Button>
 
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="w-12 h-12 rounded-full bg-muted/50 border-0 hover:bg-muted text-foreground transition-all"
-          >
-            <MoreHorizontal className="w-6 h-6" />
-          </Button>
-
-          <div className="w-px h-8 bg-border mx-2"></div>
+          <div className="w-px h-6 md:h-8 bg-border shrink-0"></div>
 
           {isCallActive ? (
             <Button 
               onClick={() => setIsCallActive(false)}
               variant="destructive" 
-              className="rounded-full px-8 h-12 font-bold text-base shadow-lg shadow-red-500/20 hover:scale-105 transition-all"
+              className="rounded-full px-4 md:px-8 h-10 md:h-12 font-bold text-sm md:text-base shadow-lg shadow-red-500/20 hover:scale-105 transition-all shrink-0"
             >
               Encerrar
             </Button>
           ) : (
             <Button 
               onClick={() => setIsCallActive(true)}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-full px-8 h-12 font-bold text-base shadow-lg shadow-green-500/20 hover:scale-105 transition-all border-0"
+              className="bg-green-500 hover:bg-green-600 text-white rounded-full px-4 md:px-8 h-10 md:h-12 font-bold text-sm md:text-base shadow-lg shadow-green-500/20 hover:scale-105 transition-all border-0 shrink-0"
             >
               INICIAR 
             </Button>

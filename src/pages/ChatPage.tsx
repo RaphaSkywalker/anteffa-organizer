@@ -1,5 +1,5 @@
 import { useI18n } from "@/contexts/I18nContext";
-import { Send, Search, Circle, Pencil, Trash2, Hash, Users, X } from "lucide-react";
+import { Send, Search, Circle, Pencil, Trash2, Hash, Users, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
@@ -239,44 +239,42 @@ export default function ChatPage() {
     <div className="h-[calc(100vh-12rem)]">
       <motion.div {...fadeIn} className="flex gap-0 h-[calc(100vh-8.5rem)] rounded-[2rem] border border-border overflow-hidden glass-card shadow-2xl">
         {/* Sidebar */}
-        <div className="w-72 border-r border-border flex flex-col shrink-0 bg-muted/10">
-          <div className="p-6 border-b border-border">
-            <h1 className="text-xl font-bold text-foreground mb-4">Conversas</h1>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card/50 text-xs border border-border placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
-                placeholder="Pesquisar..."
-              />
+        <div className="w-[72px] md:w-72 border-r border-border flex flex-col shrink-0 bg-muted/10 transition-all duration-300">
+          <div className="p-4 md:p-6 border-b border-border">
+            <h1 className="hidden md:block text-xl font-bold text-foreground">Conversas</h1>
+            <div className="md:hidden flex justify-center pt-2 pb-2">
+               <MessageSquare className="w-6 h-6 text-muted-foreground/60" />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-2 md:px-3 py-4 space-y-6 custom-scrollbar overflow-x-hidden">
             {/* Canais */}
             <div>
-              <p className="px-3 mb-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Canais</p>
-              <div className="space-y-1">
+              <p className="hidden md:block px-3 mb-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Canais</p>
+              <div className="space-y-2 md:space-y-1 border-b border-border/50 pb-4 md:pb-0 md:border-0">
                 <button
                   onClick={() => setActiveChat({ id: "geral", name: "Geral", type: "global" })}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group",
+                    "w-full flex items-center justify-center md:justify-start gap-0 md:gap-3 px-0 md:px-3 py-3 md:py-2.5 rounded-xl text-sm transition-all group",
                     activeChat.id === "geral" && activeChat.type === "global" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
+                  title="Geral"
                 >
-                  <Hash className={cn("w-4 h-4", activeChat.id === "geral" ? "text-primary-foreground" : "text-primary")} />
-                  <span className="font-bold">Geral</span>
+                  <Hash className={cn("w-6 h-6 md:w-4 md:h-4", activeChat.id === "geral" ? "text-primary-foreground" : "text-primary")} />
+                  <span className="hidden md:block font-bold">Geral</span>
                 </button>
 
                 {teamId && (
                   <button
                     onClick={() => setActiveChat({ id: teamId, name: teamName || "Minha Equipe", type: "team" })}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group",
+                      "w-full flex items-center justify-center md:justify-start gap-0 md:gap-3 px-0 md:px-3 py-3 md:py-2.5 rounded-xl text-sm transition-all group",
                       activeChat.type === "team" ? "bg-accent text-accent-foreground shadow-lg shadow-accent/20" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     )}
+                    title={teamName || "Equipe"}
                   >
-                    <Users className={cn("w-4 h-4", activeChat.type === "team" ? "text-accent-foreground" : "text-accent")} />
-                    <span className="font-bold">{teamName || "Equipe"}</span>
+                    <Users className={cn("w-6 h-6 md:w-4 md:h-4", activeChat.type === "team" ? "text-accent-foreground" : "text-accent")} />
+                    <span className="hidden md:block font-bold">{teamName || "Equipe"}</span>
                   </button>
                 )}
               </div>
@@ -284,7 +282,7 @@ export default function ChatPage() {
 
             {/* Contatos */}
             <div>
-              <p className="px-3 mb-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+              <p className="hidden md:block px-3 mb-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
                 Equipe Anteffa {contacts.length > 0 && `(${contacts.length})`}
               </p>
               {/* Debug info - only visible if 0 contacts */}
@@ -293,23 +291,24 @@ export default function ChatPage() {
                   Verificando banco de dados...
                 </p>
               )}
-              <div className="space-y-1">
+                  <div className="space-y-2 md:space-y-1">
                 {isLoading && contacts.length === 0 ? (
-                  <p className="px-3 text-[10px] text-muted-foreground animate-pulse">Carregando contatos...</p>
+                  <p className="hidden md:block px-3 text-[10px] text-muted-foreground animate-pulse">Carregando contatos...</p>
                 ) : error ? (
-                  <p className="px-3 text-[10px] text-destructive italic">{error}</p>
+                  <p className="hidden md:block px-3 text-[10px] text-destructive italic">{error}</p>
                 ) : contacts.length > 0 ? (
                   contacts.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => setActiveChat({ id: c.id, name: c.name || c.username, type: "direct", avatar_url: c.avatar_url })}
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group relative",
+                        "w-full flex items-center justify-center md:justify-start gap-0 md:gap-3 px-0 md:px-3 py-2 md:py-2.5 rounded-xl text-sm transition-all group relative",
                         String(activeChat.id) === String(c.id) && activeChat.type === 'direct' ? "bg-muted text-foreground border border-border shadow-sm" : "text-muted-foreground hover:bg-muted/30"
                       )}
+                      title={c.name || c.username}
                     >
-                      <div className="relative">
-                        <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-[10px] font-bold text-primary-foreground shrink-0 overflow-hidden">
+                      <div className="relative shrink-0">
+                        <div className="w-10 h-10 md:w-8 md:h-8 rounded-full gradient-brand flex items-center justify-center text-[12px] md:text-[10px] font-bold text-primary-foreground shrink-0 overflow-hidden shadow-sm md:shadow-none">
                           {c.avatar_url ? (
                             <img src={`http://${window.location.hostname}:3001${c.avatar_url}`} className="w-full h-full object-cover" />
                           ) : (
@@ -318,11 +317,11 @@ export default function ChatPage() {
                         </div>
                         <div className="w-2.5 h-2.5 rounded-full absolute -bottom-0.5 -right-0.5 border-2 border-card bg-success" />
                       </div>
-                      <div className="flex flex-col items-start min-w-0 flex-1 pr-6">
+                      <div className="hidden md:flex flex-col items-start min-w-0 flex-1 pr-6">
                         <span className="font-bold truncate w-full tracking-tight text-left">{c.name || c.username}</span>
                         <span className="text-[9px] opacity-60 uppercase font-black tracking-tighter text-left">{c.team_name || "Geral"}</span>
                       </div>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <div className="absolute right-0 top-0 md:right-4 md:top-1/2 md:-translate-y-1/2 pointer-events-none">
                         {c.unread_count !== undefined && c.unread_count > 0 && String(activeChat.id) !== String(c.id) && (
                           <div
                             className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center animate-bounce shadow-lg shadow-red-600/40 z-20"
@@ -343,11 +342,11 @@ export default function ChatPage() {
         </div>
 
         {/* Chat area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background/40">
-          <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card/30 backdrop-blur-sm">
-            <div className="flex items-center gap-4">
+        <div className="flex-1 flex flex-col min-w-0 bg-background/40 relative md:static pb-[80px] md:pb-0">
+          <div className="px-4 md:px-6 py-3 md:py-4 border-b border-border flex items-center justify-between bg-card/30 backdrop-blur-sm">
+            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
               <div className={cn(
-                "p-2.5 rounded-xl",
+                "p-2 md:p-2.5 rounded-xl shrink-0",
                 activeChat.type === "global" ? "bg-primary/10" : activeChat.type === "team" ? "bg-accent/10" : "bg-muted"
               )}>
                 {activeChat.type === "global" ? (
@@ -366,21 +365,21 @@ export default function ChatPage() {
                   </div>
                 )}
               </div>
-              <div>
-                <h2 className="text-sm font-black text-foreground uppercase tracking-tight">{activeChat.name}</h2>
-                <div className="flex items-center gap-1.5">
+              <div className="flex-1 min-w-0 pr-2">
+                <h2 className="text-sm md:text-base font-black text-foreground uppercase tracking-tight truncate w-full">{activeChat.name}</h2>
+                <div className="flex items-center gap-1.5 mt-0.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-muted-foreground font-bold">Ativo agora</span>
+                  <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold">Ativo agora</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={handleClearChat}
-              className="p-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group flex items-center gap-2"
+              className="p-2 md:p-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group flex items-center gap-2 shrink-0"
               title="Limpar Chat"
             >
-              <span className="text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Limpar Chat</span>
+              <span className="hidden md:inline-block text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Limpar Chat</span>
               <Trash2 className="w-5 h-5" />
             </button>
           </div>
@@ -440,18 +439,18 @@ export default function ChatPage() {
             <div ref={chatEndRef} />
           </div>
 
-          <div className="p-6 bg-card/30 backdrop-blur-sm border-t border-border">
-            <form onSubmit={handleSendMessage} className="flex gap-3 relative">
+          <div className="absolute md:relative bottom-0 left-[-72px] md:left-0 w-[calc(100%+72px)] md:w-full p-3 md:p-6 bg-card/90 md:bg-card/30 backdrop-blur-xl md:backdrop-blur-sm border-t border-border z-20 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.5)] md:shadow-none">
+            <form onSubmit={handleSendMessage} className="flex gap-2 md:gap-3 relative">
               <input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                className="flex-1 px-6 py-4 rounded-2xl bg-background/50 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
+                className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-2xl bg-background/50 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
                 placeholder={activeChat.type !== 'direct' ? `Mensagem em #${activeChat.name}...` : `Mensagem privada para ${activeChat.name}...`}
               />
               <button
                 type="submit"
                 disabled={!inputValue.trim()}
-                className="p-4 rounded-2xl gradient-brand text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all disabled:opacity-50 active:scale-95"
+                className="p-3 md:p-4 rounded-2xl gradient-brand text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all disabled:opacity-50 active:scale-95 shrink-0"
               >
                 <Send className="w-5 h-5" />
               </button>

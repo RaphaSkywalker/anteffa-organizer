@@ -91,29 +91,8 @@ export function AppLayout() {
              </button>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-xl hidden sm:block">
-             <div className={cn(
-                "relative group transition-all duration-300",
-                searchFocused ? "scale-[1.02]" : "scale-100"
-             )}>
-                <Search className={cn(
-                   "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
-                   searchFocused ? "text-primary" : "text-muted-foreground"
-                )} />
-                <input 
-                   type="text" 
-                   placeholder="Pesquisar..."
-                   onFocus={() => setSearchFocused(true)}
-                   onBlur={() => setSearchFocused(false)}
-                   className="w-full bg-muted/30 border border-border rounded-xl pl-11 pr-16 py-2 text-sm outline-none focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all lg:py-2.5"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-background border border-border px-1.5 py-0.5 rounded-md shadow-sm pointer-events-none hidden lg:flex">
-                   <Command className="w-2.5 h-2.5 text-muted-foreground" />
-                   <span className="text-[10px] font-bold text-muted-foreground">F</span>
-                </div>
-             </div>
-          </div>
+          {/* Spacing to push right actions */}
+          <div className="flex-1" />
 
           {/* Right Actions */}
           <div className="flex items-center gap-3 lg:gap-6">

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn, safeDate } from "@/lib/utils";
 
@@ -137,6 +138,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<'noticia' | 'beneficio' | 'aviso'>('noticia');
   const [allBulletins, setAllBulletins] = useState<any[]>([]);
+  const [selectedBulletin, setSelectedBulletin] = useState<any | null>(null);
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
@@ -345,7 +347,11 @@ export default function Dashboard() {
                       allBulletins.filter(b => b.category === activeCategory).slice(0, 3).map((bul) => {
                         const Icon = getCategoryIcon(bul.category);
                         return (
-                          <div key={bul.id} className="group/item cursor-pointer flex items-start gap-4 p-4 rounded-2xl hover:bg-white/15 transition-all border border-transparent hover:border-white/10 shadow-sm hover:shadow-md">
+                          <div 
+                             key={bul.id} 
+                             onClick={() => setSelectedBulletin(bul)}
+                             className="group/item cursor-pointer flex items-start gap-4 p-4 rounded-2xl hover:bg-white/15 transition-all border border-transparent hover:border-white/10 shadow-sm hover:shadow-md"
+                          >
                              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
                                 <Icon className="w-5 h-5" />
                              </div>
@@ -512,6 +518,56 @@ export default function Dashboard() {
 
           <div className="absolute top-0 right-0 w-[50%] h-full bg-primary/5 -skew-x-12 translate-x-20 pointer-events-none" />
        </motion.div>
+
+      {/* Bulletin Detail Dialog */}
+      <Dialog open={!!selectedBulletin} onOpenChange={(open) => !open && setSelectedBulletin(null)}>
+        <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden border-none shadow-2xl rounded-2xl bg-card">
+          {selectedBulletin && (
+            <div className="relative">
+               <div className="absolute top-0 w-full h-32 bg-gradient-to-br from-primary/10 to-accent/10 pointer-events-none opacity-50" />
+               <DialogHeader className="pt-8 px-8 pb-6 border-b border-border/50 relative z-10 bg-background/50 backdrop-blur-sm">
+                 <button 
+                   onClick={() => setSelectedBulletin(null)}
+                   className="absolute top-4 right-4 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95"
+                 >
+                   <X className="w-5 h-5" />
+                 </button>
+                 <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-[1.25rem] bg-card border border-border flex items-center justify-center shadow-sm">
+                       {(() => {
+                           const Icon = getCategoryIcon(selectedBulletin.category);
+                           return <Icon className="w-7 h-7 text-primary" />;
+                       })()}
+                    </div>
+                    <div>
+                       <div className="flex items-center gap-2 mb-1">
+                         <span className={cn(
+                            "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
+                            selectedBulletin.category === 'noticia' ? "bg-blue-500/10 text-blue-500" :
+                            selectedBulletin.category === 'beneficio' ? "bg-amber-500/10 text-amber-500" : "bg-red-500/10 text-red-500"
+                         )}>
+                           {selectedBulletin.category === 'noticia' ? 'Notícia' : selectedBulletin.category === 'beneficio' ? 'Benefício' : 'Aviso'}
+                         </span>
+                         <span className="w-1.5 h-1.5 rounded-full bg-border" />
+                         <span className="text-[10px] text-muted-foreground font-bold">{safeDate(selectedBulletin.created_at).toLocaleDateString('pt-BR')}</span>
+                       </div>
+                       <p className="text-xs font-semibold text-muted-foreground uppercase opacity-80">Mural Anteffa</p>
+                    </div>
+                 </div>
+                 <DialogTitle className="text-2xl sm:text-3xl font-black text-foreground leading-[1.1] mb-2">{selectedBulletin.title}</DialogTitle>
+               </DialogHeader>
+               
+               <div className="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar bg-card/30">
+                 <div className="text-base text-muted-foreground leading-relaxed">
+                    {selectedBulletin.content?.split('\n').map((paragraph: string, i: number) => (
+                       <p key={i} className="mb-5 last:mb-0 min-h-[1.5rem] tracking-wide">{paragraph}</p>
+                    ))}
+                 </div>
+               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
