@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 // Multer Storage for Avatars
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/avatars/');
+        cb(null, path.join(__dirname, 'uploads/avatars/'));
     },
     filename: (req, file, cb) => {
         const userId = req.user?.id || 'temp';
@@ -40,7 +40,7 @@ const upload = multer({
 // Multer Storage for Documents
 const docStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/documents/');
+        cb(null, path.join(__dirname, 'uploads/documents/'));
     },
     filename: (req, file, cb) => {
         const userId = req.user?.id || 'temp';
